@@ -1,3 +1,4 @@
+// verify_jwt disabled in config.toml; we manually verify the user inside the function.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
