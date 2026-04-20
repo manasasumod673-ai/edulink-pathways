@@ -40,7 +40,7 @@ function Communities() {
       .select("*, profiles(display_name)")
       .eq("community_id", c.id)
       .order("created_at", { ascending: false });
-    setPosts((data ?? []) as Post[]);
+    setPosts((data ?? []) as unknown as Post[]);
   };
 
   const join = async (c: Community) => {

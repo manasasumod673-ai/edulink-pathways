@@ -21,7 +21,7 @@ function RoadmapPage() {
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("roadmaps").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    setItems((data ?? []) as Roadmap[]);
+    setItems((data ?? []) as unknown as Roadmap[]);
   };
 
   useEffect(() => { load(); }, [user]);
