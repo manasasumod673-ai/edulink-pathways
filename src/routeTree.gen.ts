@@ -9,38 +9,170 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AppRoadmapRouteImport } from './routes/app.roadmap'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppOpportunitiesRouteImport } from './routes/app.opportunities'
+import { Route as AppMessagesRouteImport } from './routes/app.messages'
+import { Route as AppLeaderboardRouteImport } from './routes/app.leaderboard'
+import { Route as AppCommunitiesRouteImport } from './routes/app.communities'
 
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoadmapRoute = AppRoadmapRouteImport.update({
+  id: '/roadmap',
+  path: '/roadmap',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOpportunitiesRoute = AppOpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMessagesRoute = AppMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCommunitiesRoute = AppCommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/communities': typeof AppCommunitiesRoute
+  '/app/leaderboard': typeof AppLeaderboardRoute
+  '/app/messages': typeof AppMessagesRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/roadmap': typeof AppRoadmapRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/communities': typeof AppCommunitiesRoute
+  '/app/leaderboard': typeof AppLeaderboardRoute
+  '/app/messages': typeof AppMessagesRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/roadmap': typeof AppRoadmapRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/communities': typeof AppCommunitiesRoute
+  '/app/leaderboard': typeof AppLeaderboardRoute
+  '/app/messages': typeof AppMessagesRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/roadmap': typeof AppRoadmapRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/communities'
+    | '/app/leaderboard'
+    | '/app/messages'
+    | '/app/opportunities'
+    | '/app/profile'
+    | '/app/roadmap'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app/communities'
+    | '/app/leaderboard'
+    | '/app/messages'
+    | '/app/opportunities'
+    | '/app/profile'
+    | '/app/roadmap'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/communities'
+    | '/app/leaderboard'
+    | '/app/messages'
+    | '/app/opportunities'
+    | '/app/profile'
+    | '/app/roadmap'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignupRoute: typeof AuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +180,100 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/roadmap': {
+      id: '/app/roadmap'
+      path: '/roadmap'
+      fullPath: '/app/roadmap'
+      preLoaderRoute: typeof AppRoadmapRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/opportunities': {
+      id: '/app/opportunities'
+      path: '/opportunities'
+      fullPath: '/app/opportunities'
+      preLoaderRoute: typeof AppOpportunitiesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/messages': {
+      id: '/app/messages'
+      path: '/messages'
+      fullPath: '/app/messages'
+      preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/leaderboard': {
+      id: '/app/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/app/leaderboard'
+      preLoaderRoute: typeof AppLeaderboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/communities': {
+      id: '/app/communities'
+      path: '/communities'
+      fullPath: '/app/communities'
+      preLoaderRoute: typeof AppCommunitiesRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCommunitiesRoute: typeof AppCommunitiesRoute
+  AppLeaderboardRoute: typeof AppLeaderboardRoute
+  AppMessagesRoute: typeof AppMessagesRoute
+  AppOpportunitiesRoute: typeof AppOpportunitiesRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppRoadmapRoute: typeof AppRoadmapRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCommunitiesRoute: AppCommunitiesRoute,
+  AppLeaderboardRoute: AppLeaderboardRoute,
+  AppMessagesRoute: AppMessagesRoute,
+  AppOpportunitiesRoute: AppOpportunitiesRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppRoadmapRoute: AppRoadmapRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSignupRoute: AuthSignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

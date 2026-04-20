@@ -1,0 +1,4 @@
+project_id = "cyhtqnsfkbsdcohanljd"
+
+[functions.ai-roadmap]
+verify_jwt = true
