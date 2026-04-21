@@ -1,4 +1,6 @@
 // verify_jwt disabled in config.toml; we manually verify the user inside the function.
+// AI provider: Google Gemini via OpenAI-compatible endpoint.
+// Set GEMINI_API_KEY in Supabase Dashboard → Edge Functions → Secrets.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -31,14 +33,14 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id);
     const skills = (skillRows ?? []).map((r: { skills: { name: string } | null }) => r.skills?.name).filter(Boolean);
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) return new Response(JSON.stringify({ error: "AI not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const apiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!apiKey) return new Response(JSON.stringify({ error: "AI not configured — set GEMINI_API_KEY in Supabase Edge Function secrets." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         messages: [
           { role: "system", content: "You are a learning coach. Build practical step-by-step roadmaps." },
           { role: "user", content: `Goal: ${goal}\nCurrent skills: ${skills.join(", ") || "none"}\nReturn a roadmap of 6-10 actionable steps.` },
