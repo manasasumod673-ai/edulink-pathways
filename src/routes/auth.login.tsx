@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/edulink/Navbar";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/login")({ component: LoginPage });
 
@@ -14,6 +15,12 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+
+  // Already signed in → go straight to app
+  useEffect(() => {
+    if (!authLoading && user) navigate({ to: "/app" });
+  }, [user, authLoading]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,18 +28,20 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // Clear fields
+    setEmail("");
+    setPassword("");
     toast.success("Welcome back!");
     navigate({ to: "/app" });
   };
+
+  if (authLoading || user) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="mx-auto max-w-md px-4 py-16">
-        <div
-          className="rounded-2xl border border-border/60 bg-card p-8"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
+        <div className="rounded-2xl border border-border/60 bg-card p-8" style={{ boxShadow: "var(--shadow-card)" }}>
           <h1 className="mb-1 text-2xl font-bold">Welcome back</h1>
           <p className="mb-6 text-sm text-muted-foreground">Sign in to continue your journey.</p>
           <form onSubmit={submit} className="space-y-4">
@@ -42,27 +51,15 @@ function LoginPage() {
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
-            >
+            <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
               {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             New here?{" "}
-            <Link to="/auth/signup" className="text-primary hover:underline">
-              Create an account
-            </Link>
+            <Link to="/auth/signup" className="text-primary hover:underline">Create an account</Link>
           </p>
         </div>
       </div>

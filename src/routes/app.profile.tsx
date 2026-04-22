@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LevelBadge } from "@/components/edulink/LevelBadge";
 import { XpBar } from "@/components/edulink/XpBar";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Camera, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/profile")({ component: ProfilePage });
 
@@ -20,6 +20,7 @@ type Profile = {
   github_url: string | null;
   total_xp: number;
   current_level: number;
+  avatar_url: string | null;
 };
 type Skill = { id: string; name: string };
 type Project = { id: string; title: string; description: string | null; tech_stack: string[] | null };
@@ -31,6 +32,39 @@ function ProfilePage() {
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [newProj, setNewProj] = useState({ title: "", description: "", tech: "" });
+  const [uploading, setUploading] = useState(false);
+
+  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !user) return;
+    const file = e.target.files[0];
+    
+    if (!file.type.startsWith("image/")) {
+      return toast.error("Please upload an image file");
+    }
+
+    setUploading(true);
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
+    if (uploadError) {
+      setUploading(false);
+      return toast.error("Upload failed: " + uploadError.message + " (Check if 'avatars' bucket exists and is public)");
+    }
+    
+    const { data: publicUrlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const newAvatarUrl = publicUrlData.publicUrl;
+    
+    setProfile(p => p ? { ...p, avatar_url: newAvatarUrl } : null);
+    
+    const { error: updateError } = await supabase.from("profiles").update({ avatar_url: newAvatarUrl }).eq("id", user.id);
+    if (updateError) {
+      toast.error("Failed to save avatar to profile");
+    } else {
+      toast.success("Profile photo updated!");
+    }
+    setUploading(false);
+  };
 
   const load = async () => {
     if (!user) return;
@@ -62,6 +96,7 @@ function ProfilePage() {
       bio: profile.bio,
       headline: profile.headline,
       github_url: profile.github_url,
+      avatar_url: profile.avatar_url,
     }).eq("id", user.id);
     if (error) return toast.error(error.message);
     toast.success("Profile saved");
@@ -105,6 +140,27 @@ function ProfilePage() {
       <div className="space-y-6 lg:col-span-2">
         <div className="rounded-2xl border border-border/60 bg-card p-6">
           <h2 className="mb-4 text-xl font-bold">Edit profile</h2>
+          
+          <div className="mb-6 flex items-center gap-4">
+            <div className="relative flex h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-border/60 bg-secondary/50">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} className="h-full w-full object-cover" alt="Avatar" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-primary">
+                  {profile.display_name[0]?.toUpperCase()}
+                </div>
+              )}
+              <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 text-white opacity-0 transition-opacity hover:opacity-100">
+                {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+                <input type="file" accept="image/*" className="hidden" onChange={uploadAvatar} disabled={uploading} />
+              </label>
+            </div>
+            <div>
+              <h3 className="font-semibold">Profile Photo</h3>
+              <p className="text-xs text-muted-foreground">Click the image to upload a new one. Max 2MB.</p>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div>
               <Label>Display name</Label>

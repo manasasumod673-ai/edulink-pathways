@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/edulink/Navbar";
 import { GraduationCap, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/signup")({
   component: SignupPage,
@@ -18,11 +19,17 @@ export const Route = createFileRoute("/auth/signup")({
 function SignupPage() {
   const { role: initialRole } = Route.useSearch();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [role, setRole] = useState<"student" | "recruiter">(initialRole);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Already signed in → go straight to app
+  useEffect(() => {
+    if (!authLoading && user) navigate({ to: "/app" });
+  }, [user, authLoading]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,11 +42,28 @@ function SignupPage() {
         data: { display_name: name, role },
       },
     });
+    if (error) {
+      if (error.message?.toLowerCase().includes("email rate limit") ||
+          (error as any)?.code === "over_email_send_rate_limit") {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (!signInError) {
+          setLoading(false);
+          setName(""); setEmail(""); setPassword("");
+          toast.success("Account created! Welcome to EduLink.");
+          navigate({ to: "/app" });
+          return;
+        }
+      }
+      setLoading(false);
+      return toast.error(error.message);
+    }
+    setName(""); setEmail(""); setPassword("");
     setLoading(false);
-    if (error) return toast.error(error.message);
     toast.success("Account created! Welcome to EduLink.");
     navigate({ to: "/app" });
   };
+
+  if (authLoading || user) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
