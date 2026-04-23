@@ -31,9 +31,15 @@ function RoadmapPage() {
     setLoading(true);
     const { data, error } = await supabase.functions.invoke("ai-roadmap", { body: { goal } });
     setLoading(false);
-    if (error) return toast.error(error.message);
-    if ((data as { error?: string })?.error) return toast.error((data as { error: string }).error);
-    toast.success("Roadmap generated!");
+    if (error) return toast.error("Something went wrong. Please try again.");
+    const errMsg = (data as { error?: string })?.error;
+    if (errMsg) {
+      if (errMsg.toLowerCase().includes("rate limit")) {
+        return toast.error("⏳ AI is busy — please wait 60 seconds and try again.", { duration: 6000 });
+      }
+      return toast.error(errMsg);
+    }
+    toast.success("🎉 Roadmap generated! +50 XP");
     setGoal("");
     load();
   };
