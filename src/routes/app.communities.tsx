@@ -35,11 +35,16 @@ function Communities() {
 
   const loadPosts = async (c: Community) => {
     setActive(c);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("posts")
       .select("*, profiles(display_name)")
       .eq("community_id", c.id)
       .order("created_at", { ascending: false });
+      
+    if (error) {
+      console.error("Error loading posts:", error);
+      toast.error("Failed to load posts: " + error.message);
+    }
     setPosts((data ?? []) as unknown as Post[]);
   };
 
