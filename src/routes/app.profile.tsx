@@ -163,6 +163,14 @@ function ProfilePage() {
 
           <div className="space-y-4">
             <div>
+              <Label>Email</Label>
+              <Input
+                value={user.email ?? ""}
+                disabled
+                className="bg-muted cursor-not-allowed"
+              />
+            </div>
+            <div>
               <Label>Display name</Label>
               <Input
                 value={profile.display_name}
